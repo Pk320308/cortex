@@ -1,0 +1,67 @@
+<form name="userForm" ng-submit="$modal.saveUser(userForm)" novalidate>
+  <div class="modal-header" style="border-bottom: 1px solid var(--border-glass); padding: 20px;">
+    <h3 class="modal-title" style="margin: 0; font-weight: 700; letter-spacing: 1px;">
+      <i class="fa fa-user-plus" style="margin-right: 8px;"></i>
+      {{$modal.isEdit ? 'Edit' : 'Add'}} user
+    </h3>
+  </div>
+  <div class="modal-body" style="padding: 30px;">
+    
+    <div class="form-group" style="margin-bottom: 20px;" ng-class="{ 'has-error' : userForm.login.$invalid && !userForm.login.$pristine }">
+      <label style="font-weight: 500; margin-bottom: 8px; display: block;">
+        Login Username
+        <i class="fa fa-asterisk text-danger" style="font-size: 10px;"></i>
+      </label>
+      <input class="form-control" name="login" placeholder="User's login ID" ng-disabled="$modal.isEdit" ng-model="$modal.formData.id" required
+        type="text" ng-change="$modal.resetLoginError(userForm)" style="height: 45px; border-radius: 8px;">
+      <p class="help-block text-danger" ng-show="userForm.login.$invalid && !userForm.login.$pristine && userForm.login.$error.required" style="margin-top: 5px;">This field is required.</p>
+      <p class="help-block text-danger" ng-show="userForm.login.$invalid && userForm.login.$error.exists" style="margin-top: 5px;">This login is already in use.</p>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 20px;" ng-class="{ 'has-error' : userForm.name.$invalid && !userForm.name.$pristine }">
+      <label style="font-weight: 500; margin-bottom: 8px; display: block;">
+        Full Name
+        <i class="fa fa-asterisk text-danger" style="font-size: 10px;"></i>
+      </label>
+      <input class="form-control" name="name" placeholder="User's full name" ng-model="$modal.formData.name" required type="text" style="height: 45px; border-radius: 8px;">
+      <p class="help-block text-danger" ng-show="userForm.name.$invalid && !userForm.name.$pristine" style="margin-top: 5px;">This field is required.</p>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 20px;" ng-class="{ 'has-error' : userForm.organization.$invalid && !userForm.organization.$pristine }" ng-show="!$modal.orgId">
+      <label style="font-weight: 500; margin-bottom: 8px; display: block;">
+        Organization
+        <i class="fa fa-asterisk text-danger" style="font-size: 10px;"></i>
+      </label>
+      <select class="form-control" name="organization" ng-model="$modal.formData.organization" ng-options="org.id as org.name for org in $modal.organizations"
+        ng-change="$modal.onOrgChange()" required style="height: 45px; border-radius: 8px;"></select>
+      <p class="help-block text-danger" ng-show="userForm.organization.$invalid && !userForm.organization.$pristine" style="margin-top: 5px;">This field is required.</p>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 10px;">
+      <label style="font-weight: 500; margin-bottom: 8px; display: block;">
+        Roles
+        <i class="fa fa-asterisk text-danger" style="font-size: 10px;"></i>
+      </label>
+      <div class="btn-group" uib-dropdown style="width: 100%;">
+        <button class="btn btn-default dropdown-toggle" uib-dropdown-toggle type="button" ng-disabled="!$modal.formData.organization" 
+          style="width: 100%; text-align: left; height: 45px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); color: var(--text-main); border: 1px solid rgba(255,255,255,0.1);">
+          <span>{{$modal.formData.roles.join(', ') || 'Select Role'}}</span>
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" uib-dropdown-menu style="width: 100%;">
+          <li>
+            <a href ng-click="$modal.formData.roles = r" ng-repeat="r in $modal.rolesList">{{r.join(', ')}}</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+  <div class="modal-footer" style="border-top: 1px solid var(--border-glass); padding: 20px;">
+    <button class="btn btn-default pull-left" ng-click="$modal.cancel()" type="button" style="border-radius: 8px;">Cancel</button>
+    <span class="text-muted pull-left" style="font-size: 12px; margin-top: 8px; margin-left: 15px;">
+      <i class="fa fa-asterisk text-danger"></i> Required field
+    </span>
+    <button class="btn btn-primary pull-right" ng-disabled="userForm.$invalid" type="submit" style="border-radius: 8px; padding: 6px 25px; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);">Save User</button>
+  </div>
+</form>

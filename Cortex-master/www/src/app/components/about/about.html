@@ -1,0 +1,37 @@
+<div class="modal-header" style="border-bottom: 1px solid var(--border-glass); padding: 20px;">
+  <h3 class="modal-title" style="margin: 0; font-weight: 700; letter-spacing: 1px;"><i class="fa fa-info-circle"
+      style="margin-right: 8px;"></i> About Cynox</h3>
+</div>
+<div class="modal-body" style="padding: 30px;">
+  <div class="text-center" style="margin-bottom: 30px;">
+    <div style="display: inline-block; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 20px; border: 1px solid var(--border-glass); box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+      <img alt="Cynox" height="60" src="../../../assets/images/logo-dark.png" />
+    </div>
+  </div>
+
+  <div
+    style="background: rgba(0,0,0,0.2); border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 25px;">
+    <h4
+      style="margin-top: 0; margin-bottom: 15px; font-size: 14px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px;">
+      System Versions</h4>
+    <div
+      style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);"
+      ng-repeat="(module, ver) in $modal.version" ng-last="$last">
+      <strong style="color: var(--text-main);">{{module}}</strong>
+      <span style="color: var(--accent); font-family: monospace; font-size: 14px;">{{ver}}</span>
+    </div>
+  </div>
+
+  <div class="text-center">
+
+    <div style="font-size: 14px; color: var(--text-muted); font-weight: 500;">
+      &copy; Cynox Project
+    </div>
+  </div>
+</div>
+<div class="modal-footer" style="border-top: 1px solid var(--border-glass); padding: 20px; text-align: center;">
+  <button class="btn btn-primary" ng-click="$modal.close()"
+    style="border-radius: 8px; padding: 8px 30px; font-weight: 600; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);">
+    Close
+  </button>
+</div>

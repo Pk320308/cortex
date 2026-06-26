@@ -1,0 +1,5 @@
+FROM cortex:3.1.2-SNAPSHOT
+COPY www/dist /tmp/www
+RUN apt-get update && apt-get install -y zip && \
+    cd /tmp && zip -ur /opt/cortex/lib/org.thehive-project.cortex-4.0.1-1-assets.jar www/* && \
+    rm -rf /tmp/www

@@ -1,0 +1,7 @@
+FROM eclipse-temurin:21-jre
+RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
+COPY target/universal/cortex-4.0.1-1.zip /tmp/cortex.zip
+RUN unzip /tmp/cortex.zip -d /opt/ && mv /opt/cortex-4.0.1-1 /opt/cortex && rm /tmp/cortex.zip
+WORKDIR /opt/cortex
+EXPOSE 9000
+CMD ["bin/cortex", "-Dconfig.file=conf/application.conf"]

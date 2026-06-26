@@ -1,0 +1,66 @@
+.navbar {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 95%;
+  max-width: 1400px;
+  border-radius: 20px;
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glass) !important;
+  z-index: 1030;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+
+  a {
+    color: var(--text-main) !important;
+  }
+
+  .nav > li > a:hover,
+  .nav > li > a:focus {
+    background: var(--bg-glass-hover) !important;
+    border-radius: 12px;
+  }
+
+  .avatar.avatar-xs {
+    line-height: 20px;
+
+    span {
+      line-height: 20px;
+      font-weight: bold;
+    }
+
+    .avatar-icon {
+      margin-top: -5px;
+    }
+  }
+}
+
+body {
+  padding-top: 100px; /* offset for fixed floating header */
+}
+
+.profile-dropdown {
+  &.open {
+    .dropdown-menu {
+      left: auto;
+      right: 0;
+    }
+  }
+}
+
+.notif-badge {
+  position: relative;
+}
+
+.notif-badge:after {
+  position: absolute;
+  content: "";
+  width: 10px;
+  height: 10px;
+  left: -5px;
+  top: -5px;
+  background-color: rgb(240, 43, 43);
+  border-radius: 50%;
+}

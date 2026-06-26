@@ -1,0 +1,199 @@
+#!/bin/bash
+
+test "${no_config:-0}" == 1
+CONFIG=$?
+test "${no_config_secret:-0}" == 1
+CONFIG_SECRET=$?
+test "${no_config_es:-0}" == 1
+CONFIG_ES=$?
+ES_URI=${es_uri:-}
+ES_HOSTNAME=${es_hostname:-elasticsearch}
+CONFIG_FILE=${config_file:-/etc/cortex/application.conf}
+DEFAULT_ANALYZER_URL="https://catalogs.download.strangebee.com/latest/json/analyzers.json"
+ANALYZER_URLS=()
+IFS=',' read -r -a ANALYZER_URLS <<< "${analyzer_urls:-$analyzer_url}"
+DEFAULT_RESPONDER_URL="https://catalogs.download.strangebee.com/latest/json/responders.json"
+RESPONDER_URLS=()
+IFS=',' read -r -a RESPONDER_URLS <<< "${responder_urls:-$responder_url}"
+START_DOCKER=${start_docker:-0}
+SHOW_SECRET=${show_secret:-0}
+DAEMON_USER=${daemon_user:-1001:1001}
+JOB_DIRECTORY=${job_directory:-/tmp/cortex-jobs}
+DOCKER_JOB_DIRECTORY=${docker_job_directory:-}
+KUBERNETES_JOB_PVC=${kubernetes_job_pvc:-}
+
+function usage {
+  cat <<- _EOF_
+    Available options:
+    --no-config                  | do not configure TheHive (add secret and elasticsearch)
+    --no-config-secret           | do not add random secret to configuration
+    --no-config-es               | do not add elasticsearch hosts to configuration
+    --es-uri <uri>               | use this string to configure elasticsearch hosts (format: http(s)://host:port,host:port(/prefix)?querystring)
+    --es-hostname <host>         | resolve this hostname to find elasticsearch instances
+    --secret <secret>            | secret to secure sessions
+    --show-secret                | show the generated secret
+    --job-directory <dir>        | use this directory to store job files
+    --docker-job-directory <dir> | indicate the job directory in the host (not inside container)
+    --kubernetes-job-pvc <name>  | indicate the ReadWriteMany persistent volume claim holding job directory
+    --analyzer-url <url>         | where analyzers are located (url or path)
+    --responder-url <url>        | where responders are located (url or path)
+    --start-docker               | start a internal docker (inside container) to run analyzers/responders
+    --daemon-user <uid>[:<gid>]  | run cortex using this user
+_EOF_
+  exit 1
+}
+
+STOP=0
+while test $# -gt 0 -o $STOP = 1
+do
+  case "$1" in
+    "--no-config")            CONFIG=0;;
+    "--no-config-secret")     CONFIG_SECRET=0;;
+    "--no-config-es")         CONFIG_ES=0;;
+    "--es-hosts")             echo "--es-hosts is deprecated, please use --es-uri"
+                              usage;;
+    "--es-uri")               shift; ES_URI=$1;;
+    "--es-hostname")          shift; ES_HOSTNAME=$1;;
+    "--secret")               shift; SECRET=$1;;
+    "--show-secret")          SHOW_SECRET=1;;
+    "--job-directory")        shift; JOB_DIRECTORY=$1;;
+    "--docker-job-directory") shift; DOCKER_JOB_DIRECTORY=$1;;
+    "--kubernetes-job-pvc")   shift; KUBERNETES_JOB_PVC=$1;;
+    "--analyzer-path")        echo "--analyzer-path is deprecated, please use --analyzer-url"
+                              shift; ANALYZER_URLS+=("$1");;
+    "--responder-path")       echo "--responder-path is deprecated, please use --responder-url"
+                              shift; RESPONDER_URLS+=("$1");;
+    "--analyzer-url")         shift; ANALYZER_URLS+=("$1");;
+    "--responder-url")        shift; RESPONDER_URLS+=("$1");;
+    "--start-docker")         START_DOCKER=1;;
+    "--daemon-user")          shift; DAEMON_USER=$1;;
+    "--")                     STOP=1;;
+    *)                        echo "unrecognized option: $1"; usage;;
+  esac
+  shift
+done
+
+if test $CONFIG = 1
+then
+  CONFIG_FILE=$(mktemp --tmpdir cortex-XXXXXX.conf)
+  if test $CONFIG_SECRET = 1
+  then
+    if test -z "$SECRET"
+    then
+      SECRET=$(tr -dc 'a-zA-Z0-9' < /dev/urandom | fold -w 64 | head -n 1)
+      test $SHOW_SECRET = 1 && echo "Using secret: $SECRET"
+    fi
+    echo "play.http.secret.key=\"$SECRET\"" >> "$CONFIG_FILE"
+  fi
+
+  if test $CONFIG_ES = 1
+  then
+    if test -z "$ES_URI"
+    then
+      function join_es_hosts {
+        echo -n "$1:9200"
+        shift
+        printf "%s," "${@/#/:9200}"
+      }
+
+      ES=$(getent ahostsv4 "$ES_HOSTNAME" | awk '{ print $1 }' | sort -u)
+      if test -z "$ES"
+      then
+        echo "Warning automatic elasticsearch host config fails"
+      else
+        ES_URI=http://$(join_es_hosts "$ES")
+      fi
+    fi
+    if test -n "$ES_URI"
+    then
+      echo "Using elasticsearch uri: $ES_URI"
+      echo "search.uri=\"$ES_URI\"" >> "$CONFIG_FILE"
+    else
+      echo elasticsearch host not configured
+    fi
+  fi
+
+  test -n "$JOB_DIRECTORY" && echo "job.directory=\"$JOB_DIRECTORY\"" >> "$CONFIG_FILE"
+  test -n "$DOCKER_JOB_DIRECTORY" && echo "job.dockerDirectory=\"$DOCKER_JOB_DIRECTORY\"" >> "$CONFIG_FILE"
+  test -n "$KUBERNETES_JOB_PVC" && echo "job.kubernetes.persistentVolumeClaimName=\"$KUBERNETES_JOB_PVC\"" >> "$CONFIG_FILE"
+
+  function join_urls {
+    echo -n "\"$1\""
+    shift
+    for U do echo -n ",\"$U\""; done
+  }
+  test ${#ANALYZER_URLS} = 0 && ANALYZER_URLS+=("$DEFAULT_ANALYZER_URL")
+  echo "analyzer.urls=[$(join_urls "${ANALYZER_URLS[@]}")]" >> "$CONFIG_FILE"
+
+  test ${#RESPONDER_URLS} = 0 && RESPONDER_URLS+=("$DEFAULT_RESPONDER_URL")
+  echo "responder.urls=[$(join_urls "${RESPONDER_URLS[@]}")]" >> "$CONFIG_FILE"
+
+  echo 'include file("/etc/cortex/application.conf")' >> "$CONFIG_FILE"
+fi
+
+if test $START_DOCKER = 1
+then
+  if [[ "$UID" != 0 ]]
+  then
+    echo 'You cannot start the Docker daemon because the current user is not root'
+    exit 1
+  fi
+  if ! ip link add dummy0 type dummy
+  then
+    echo 'You cannot start the Docker daemon because the current container is not privileged'
+    exit 1
+  fi
+  ip link delete dummy0
+  dockerd --host=unix:///var/run/docker.sock &> /dev/null &
+  DOCKER_PID=$!
+fi
+
+if test ! -d "$JOB_DIRECTORY"
+then
+  install -d -o cortex -p "$JOB_DIRECTORY" 2> /dev/null
+fi
+
+if [[ "$UID" == 0 ]]
+then
+  if [[ "${DAEMON_USER}" == *:* ]]
+  then
+    DAEMON_UID="${DAEMON_USER%%:*}"
+    DAEMON_GID="${DAEMON_USER##*:}"
+    echo "Using user ${DAEMON_UID} and group ${DAEMON_GID}"
+    groupmod -g "${DAEMON_GID}" cortex
+  else
+    DAEMON_UID="${DAEMON_USER}"
+    echo "Using user ${DAEMON_UID}"
+  fi
+  usermod -u "${DAEMON_UID}" cortex
+
+  chown -R cortex:cortex "$CONFIG_FILE" /etc/cortex
+  test -e /var/run/docker.sock && chown cortex:cortex /var/run/docker.sock
+  su -m cortex -c "/opt/cortex/bin/cortex \
+    -Dconfig.file=$CONFIG_FILE \
+    -Dlogger.file=/etc/cortex/logback.xml \
+    -Dpidfile.path=/dev/null \
+    $@" &
+else
+  /opt/cortex/bin/cortex \
+    -Dconfig.file=$CONFIG_FILE \
+    -Dlogger.file=/etc/cortex/logback.xml \
+    -Dpidfile.path=/dev/null \
+    $@ &
+fi
+CORTEX_PID=$!
+
+exit_func() {
+  kill "$CORTEX_PID"
+  wait "$CORTEX_PID"
+  if [[ -n "$DOCKER_PID" ]]
+  then
+    kill "$DOCKER_PID"
+    wait "$DOCKER_PID"
+  fi
+}
+
+trap "exit_func; exit" SIGINT
+trap "exit_func; exit" SIGTERM
+wait
+
