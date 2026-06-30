@@ -219,6 +219,11 @@ a:hover, a:focus {
   border-radius: 8px !important;
 }
 
+select.form-control option {
+  background: #1e2130 !important; /* solid dark for native dropdowns */
+  color: #fff !important;
+}
+
 .form-control:focus {
   border-color: var(--accent) !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
@@ -497,4 +502,33 @@ table.table > thead > tr > th {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   background: transparent !important;
+}
+
+/* Custom Header Enhancements */
+.navbar.navbar-static-top {
+  min-height: 60px !important;
+  margin-bottom: 30px !important;
+}
+
+.navbar-nav > li > a {
+  padding-top: 15px !important;
+  padding-bottom: 15px !important;
+}
+
+.navbar-brand {
+  height: 60px !important;
+  padding-top: 15px !important;
+  padding-bottom: 15px !important;
+  display: flex !important;
+  align-items: center;
+}
+
+.navbar-brand img {
+  height: 36px !important;
+}
+
+/* Adjust dropdown toggle in header if it misaligns */
+.profile-dropdown.dropdown > a {
+  padding-top: 15px !important;
+  padding-bottom: 15px !important;
 }

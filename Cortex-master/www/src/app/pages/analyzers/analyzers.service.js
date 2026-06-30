@@ -84,8 +84,10 @@ export default class AnalyzerService {
       .then(
         response => {
           this.analyzers = response.data;
+          let derivedTypes = _.uniq(_.flatten(_.map(response.data, 'dataTypeList')));
+          let defaultTypes = ['domain', 'file', 'fqdn', 'hash', 'ip', 'mail', 'mail_subject', 'other', 'regexp', 'registry', 'uri_path', 'url', 'user-agent'];
           this.dataTypes = _.without(_.sortBy(
-            _.uniq(_.flatten(_.map(response.data, 'dataTypeList')))
+            _.uniq(derivedTypes.concat(defaultTypes))
           ), undefined);
 
           defered.resolve(response.data);

@@ -18,12 +18,14 @@ services:
   cortex:
     image: cortex:3.1.2-SNAPSHOT
     restart: unless-stopped
-    command: ["sh", "-c", "rm -f /opt/cortex/RUNNING_PID && bin/cortex -Dconfig.file=conf/application.conf -Dsearch.uri=http://elasticsearch:9200 -Dplay.http.secret.key=changeme-to-a-very-secure-random-string-for-cortex-production-mode -Dhttp.port=9000"]
+    command: ["sh", "-c", "rm -f /opt/cortex/RUNNING_PID && bin/cortex -Dconfig.file=conf/application.conf -Dsearch.uri=http://elasticsearch:9200 -Dplay.http.secret.key=changeme-to-a-very-secure-random-string-for-cortex-production-mode -Dhttp.port=9000 -Danalyzer.urls.0=/opt/cortex/analyzers/analyzers -Dresponder.urls.0=/opt/cortex/analyzers/responders"]
     environment:
       - job_directory=${job_directory}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${job_directory}:${job_directory}
+      - ../../analyzers:/opt/cortex/analyzers
+      - ./cortex-assets-new.jar:/opt/cortex/lib/org.thehive-project.cortex-4.0.1-1-assets.jar
     depends_on:
       - elasticsearch
     ports:

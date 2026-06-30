@@ -18,9 +18,11 @@ export default class AnalyzerRunController {
 
   $onInit() {
     this.initialAnalyzers = this.getActiveIds();
+    let derivedTypes = uniq(_.flatten(_.map(this.analyzers, 'dataTypeList')));
+    let defaultTypes = ['domain', 'file', 'fqdn', 'hash', 'ip', 'mail', 'mail_subject', 'other', 'regexp', 'registry', 'uri_path', 'url', 'user-agent'];
     this.formData = {
       analyzers: this.analyzers,
-      dataTypes: uniq(_.flatten(_.map(this.analyzers, 'dataTypeList'))),
+      dataTypes: uniq(derivedTypes.concat(defaultTypes)).sort(),
       ids: this.getActiveIds().join(',')
     };
     this.observable.tlp = this.observable.tlp || this.Tlps[2].value;
