@@ -14,9 +14,12 @@ services:
       - ./backup:/usr/share/elasticsearch/backup
       - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     ports:
-      - "9201:9200"
+      - "9202:9200"
   cortex:
-    image: cortex:3.1.2-SNAPSHOT
+    # image: cortex:3.1.2-SNAPSHOT
+    build:
+      context: .
+      dockerfile: Dockerfile.cortex
     restart: unless-stopped
     command: ["sh", "-c", "rm -f /opt/cortex/RUNNING_PID && bin/cortex -Dconfig.file=conf/application.conf -Dsearch.uri=http://elasticsearch:9200 -Dplay.http.secret.key=changeme-to-a-very-secure-random-string-for-cortex-production-mode -Dhttp.port=9000 -Danalyzer.urls.0=/opt/cortex/analyzers/analyzers -Dresponder.urls.0=/opt/cortex/analyzers/responders"]
     environment:

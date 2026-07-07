@@ -1,0 +1,6 @@
+FROM cortex:3.1.2-SNAPSHOT
+USER root
+RUN apt-get update && \
+    apt-get install -y python3-pip python3-magic libmagic1 && \
+    rm -rf /var/lib/apt/lists/*
+RUN pip3 install --no-cache-dir --break-system-packages cortexutils future requests vt-py python-magic filetype
