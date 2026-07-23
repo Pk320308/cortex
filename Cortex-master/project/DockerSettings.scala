@@ -70,7 +70,7 @@ object DockerSettings {
           |   libboost-program-options-dev
           |   libboost-system-dev libboost-filesystem-dev libssl-dev
           |   build-essential cmake python3-dev python2-dev
-          |   git python3 python3-pip libffi-dev libjpeg62-turbo-dev libtiff5-dev
+          |   git python3 python3-pip python3-requests python3-magic libmagic1 libffi-dev libjpeg62-turbo-dev libtiff5-dev
           |   libopenjp2-7-dev zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev
           |   tcl8.6-dev tk8.6-dev python3-tk libharfbuzz-dev libfribidi-dev
           |   libxcb1-dev python2.7 &&

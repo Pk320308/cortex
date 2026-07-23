@@ -5,22 +5,22 @@ $icon-font-path: '~bootstrap-sass/assets/fonts/bootstrap/';
 
 :root {
     /* Backgrounds */
-    --bg-main: #0a0f1d;
-    --bg-surface: #0f172a;
-    --bg-glass: rgba(255, 255, 255, 0.03);
-    --bg-glass-hover: rgba(255, 255, 255, 0.08);
+    --bg-main: #141724;
+    --bg-surface: #1e2235;
+    --bg-glass: rgba(30, 34, 53, 0.85);
+    --bg-glass-hover: rgba(30, 34, 53, 1);
     
     /* Text Colors */
     --text-main: #f8fafc;
-    --text-muted: #94a3b8;
+    --text-muted: #8b98b4;
     
     /* Accents & Brand */
-    --accent: #3b82f6; /* Bright Blue */
-    --accent-hover: #60a5fa;
-    --primary-gradient: linear-gradient(135deg, #2563eb, #3b82f6);
+    --accent: #00d2ff;
+    --accent-hover: #3a86ff;
+    --primary-gradient: linear-gradient(135deg, #00d2ff, #3a86ff);
     
     /* Borders */
-    --border-glass: rgba(255, 255, 255, 0.08);
+    --border-glass: rgba(255, 255, 255, 0.05);
 }
 
 @import './vendors/AdminLTE.scss';
@@ -39,8 +39,6 @@ body {
   position: relative;
   padding-bottom: 70px;
   background-color: var(--bg-main) !important;
-  background-image: linear-gradient(135deg, #0a0f1d 0%, #1e1b4b 100%) !important;
-  background-attachment: fixed !important;
   color: var(--text-main) !important;
   font-family: 'Inter', sans-serif;
 }
@@ -531,4 +529,61 @@ table.table > thead > tr > th {
 .profile-dropdown.dropdown > a {
   padding-top: 15px !important;
   padding-bottom: 15px !important;
+}
+
+/* SIRP Enterprise Dashboard Additions */
+.label {
+  padding: 4px 10px !important;
+  border-radius: 4px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px;
+}
+.label-success {
+  background-color: rgba(6, 214, 160, 0.15) !important;
+  color: #06d6a0 !important;
+  border: 1px solid rgba(6, 214, 160, 0.3) !important;
+  box-shadow: 0 0 10px rgba(6, 214, 160, 0.2);
+}
+.label-danger {
+  background-color: rgba(239, 71, 111, 0.15) !important;
+  color: #ef476f !important;
+  border: 1px solid rgba(239, 71, 111, 0.3) !important;
+  box-shadow: 0 0 10px rgba(239, 71, 111, 0.2);
+}
+.label-warning {
+  background-color: rgba(255, 209, 102, 0.15) !important;
+  color: #ffd166 !important;
+  border: 1px solid rgba(255, 209, 102, 0.3) !important;
+  box-shadow: 0 0 10px rgba(255, 209, 102, 0.2);
+}
+.label-info, .label-default {
+  background-color: rgba(0, 210, 255, 0.15) !important;
+  color: #00d2ff !important;
+  border: 1px solid rgba(0, 210, 255, 0.3) !important;
+  box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
+}
+
+/* Card-like Table Rows */
+table.table > tbody > tr {
+  background: var(--bg-surface) !important;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2) !important;
+  margin-bottom: 10px !important;
+  border-radius: 8px !important;
+}
+table.table {
+  border-spacing: 0 10px !important;
+}
+table.table > tbody > tr > td {
+  border-top: 1px solid var(--border-glass) !important;
+  border-bottom: 1px solid var(--border-glass) !important;
+}
+table.table > tbody > tr > td:first-child {
+  border-left: 1px solid var(--border-glass) !important;
+  border-top-left-radius: 8px !important;
+  border-bottom-left-radius: 8px !important;
+}
+table.table > tbody > tr > td:last-child {
+  border-right: 1px solid var(--border-glass) !important;
+  border-top-right-radius: 8px !important;
+  border-bottom-right-radius: 8px !important;
 }
